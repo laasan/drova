@@ -3,6 +3,7 @@ import shutil
 import random
 
 
+classLabels = ['0', '1', '3']
 def transferBetweenFolders(source, dest, splitRate):
     global sourceFiles
     sourceFiles = os.listdir(source)
@@ -15,14 +16,14 @@ def transferBetweenFolders(source, dest, splitRate):
         print("No file moved. Source empty!")
 
 
-def transferAllClassBetweenFolders(source, dest, splitRate):
+def transferAllClassBetweenFolders(source, dest, splitRate, datasetFolderName):
     for label in classLabels:
         transferBetweenFolders(datasetFolderName + '/' + source + '/' + label + '/',
                                datasetFolderName + '/' + dest + '/' + label + '/',
                                splitRate)
 
 
-def prepareNameWithLabels(folderName):
+def prepareNameWithLabels(folderName, datasetFolderName, X, Y):
     sourceFiles=os.listdir(datasetFolderName+'/train/'+folderName)
     for val in sourceFiles:
         X.append(val)

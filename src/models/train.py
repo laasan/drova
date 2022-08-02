@@ -10,8 +10,9 @@ from prepare_datasets import transferAllClassBetweenFolders, prepareNameWithLabe
 import shutil
 
 
-mean=[0.485, 0.456, 0.406] # это среднее и стандартное отклонение всего датасета (обычно imagenet), на котором обучали большую сеть
-std=[0.229, 0.224, 0.225]
+mean = [0.485, 0.456, 0.406] # это среднее и стандартное отклонение всего датасета (обычно imagenet), на котором обучали большую сеть
+std = [0.229, 0.224, 0.225]
+classLabels = ['0', '1', '3']
 
 transform_train = transforms.Compose([
          transforms.Resize(1024),
@@ -26,7 +27,7 @@ transform_train = transforms.Compose([
 root_path = ''
 datasetFolderName = root_path+'data'
 sourceFiles = []
-classLabels = ['0', '1', '3']
+
 X = []
 Y = []
 
@@ -36,12 +37,13 @@ validation_path = datasetFolderName+'/validation/'
 
 # Organize file names and class labels in X and Y variables
 for i in range(len(classLabels)):
-    prepareNameWithLabels(classLabels[i])
+    prepareNameWithLabels(classLabels[i], datasetFolderName, X, Y)
 
-X=np.asarray(X)
-Y=np.asarray(Y)
+X = np.asarray(X)
+Y = np.asarray(Y)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 def train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=10):
     best_metrics = 0
@@ -120,7 +122,7 @@ skf.get_n_splits(X, Y)
 foldNum = 0
 for train_index, val_index in skf.split(X, Y):
     # First cut all images from validation to train (if any exists)
-    transferAllClassBetweenFolders('validation', 'train', 1.0)
+    transferAllClassBetweenFolders('validation', 'train', 1.0, datasetFolderName)
     foldNum += 1
     print("Results for fold", foldNum)
     X_train, X_val = X[train_index], X[val_index]
@@ -129,7 +131,7 @@ for train_index, val_index in skf.split(X, Y):
     for eachIndex in range(len(X_val)):
         classLabel = ''
         for i in range(len(classLabels)):
-            if (Y_val[eachIndex] == i):
+            if Y_val[eachIndex] == i:
                 classLabel = classLabels[i]
         # Then, copy the validation images to the validation folder
         shutil.move(datasetFolderName + '/train/' + classLabel + '/' + X_val[eachIndex],
@@ -148,5 +150,5 @@ for train_index, val_index in skf.split(X, Y):
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
     class_names = ['0', '1', '3']
 
-    net = train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=25)
+    net = train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=5)
 
