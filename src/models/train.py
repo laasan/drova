@@ -1,7 +1,7 @@
 import torch
-import torch.nn as nn
+from vgg import get_vgg
 import numpy as np
-from torchvision import datasets, models, transforms
+from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score
 from sklearn.model_selection import StratifiedKFold
@@ -88,28 +88,7 @@ def train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=10):
 
     return net
 
-
-vgg16 = models.vgg16(pretrained=True)
-
-vgg16.classifier = nn.Sequential(*list(vgg16.classifier.children()))[:-1]
-
-
-class New_VGG16(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.vgg16 = vgg16
-        # for param in self.vgg16.features.parameters():
-        #     param.requires_grad = False
-        self.fc = nn.Sequential(nn.Linear(4096, 100),
-                                nn.Linear(100, 3))
-
-    def forward(self, x):
-        x = self.vgg16(x)
-        x = self.fc(x)
-        return x
-
-
-net = New_VGG16().to(device)
+net = get_vgg().to(device)
 
 lr = 5e-4
 loss_fn = torch.nn.CrossEntropyLoss()

@@ -1,6 +1,5 @@
 import torch
-import torch.nn as nn
-from torchvision import models
+from vgg import get_vgg
 import pandas as pd
 import numpy as np
 from torchvision import datasets, transforms
@@ -25,27 +24,7 @@ transform_test = transforms.Compose([
 test_data = datasets.ImageFolder(testdata_path, transform=transform_test)
 test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=2)
 
-vgg16 = models.vgg16(pretrained=True)
-
-vgg16.classifier = nn.Sequential(*list(vgg16.classifier.children()))[:-1]
-
-
-class New_VGG16(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.vgg16 = vgg16
-        # for param in self.vgg16.features.parameters():
-        #     param.requires_grad = False
-        self.fc = nn.Sequential(nn.Linear(4096, 100),
-                                nn.Linear(100, 3))
-
-    def forward(self, x):
-        x = self.vgg16(x)
-        x = self.fc(x)
-        return x
-
-
-net = New_VGG16().to(device)
+net = get_vgg().to(device)
 #############################
 
 pred = []
@@ -54,9 +33,6 @@ with torch.no_grad():
         x, y = batch
         x = x.to(device)
         y = y.to(device)
-
-
-
         #net = New_VGG16()#.to(device)
         net.load_state_dict(torch.load('/home/neiro/PycharmProjects/drova/src/models/best_model.pt'))
         #net.eval()
@@ -80,4 +56,4 @@ files.sort()
 sample['id'] = files
 sample['id'] = sample['id'].astype(int)
 sample = sample.sort_values(by=['id'])
-sample.to_csv('/home/neiro/PycharmProjects/drova/data/sample73_loaded_pt.csv', index=False)
+sample.to_csv('/home/neiro/PycharmProjects/drova/data/sample73.csv', index=False)
