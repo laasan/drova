@@ -24,8 +24,8 @@ transform_train = transforms.Compose([
                               std=std),
 ])
 
-root_path = ''
-datasetFolderName = root_path+'data'
+root_path = '/home/neiro/PycharmProjects/drova/'
+datasetFolderName = root_path+'data/processed'
 sourceFiles = []
 
 X = []
@@ -150,5 +150,5 @@ for train_index, val_index in skf.split(X, Y):
     dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
     class_names = ['0', '1', '3']
 
-    net = train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=5)
+    net = train(net, loss_fn, optimizer, train_loader, val_loader, n_epoch=1)
 
